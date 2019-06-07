@@ -1,13 +1,40 @@
-from django.shortcuts import render
-from django.views.generic import FormView
-from .forms import SignUpForm
+from django.shortcuts import render,redirect, reverse
+from django.views.generic import FormView, TemplateView
+import requests as r
+import os
 
-# Create your views here.
+# local packages
+from v3API.forms import SignUpForm
+from v3API.services import get_authorization, get_tokens
+
+
+class ConnectCTCT(TemplateView):
+    http_method_names = ["get", "post"]
+    template_name = "connectctct.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(ConnectCTCT, self).get_context_data(**kwargs)
+        try:
+            context['code'] = self.request.GET['code']
+            print(get_tokens(context['code']))
+        except ValueError:
+            # NOTE: Add some real handling here
+            pass
+        finally:
+            return context
+    
+    def post(self, request):
+        return redirect(get_authorization())
 
 class SignUpView(FormView):
+    template_name = "sign_up.html"
     form_class = SignUpForm
     success_url = '/success/'
-
+        
     def form_valid(self, form):
-        # Sends contact to CTCT
+        # NOTE: Send form data to CTCT
         return super().form_valid(form)
+
+    
+class SuccessView(TemplateView):
+    template_name = "success.html"
