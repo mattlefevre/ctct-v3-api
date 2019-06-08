@@ -14,7 +14,7 @@ class ConnectCTCTView(TemplateView):
     template_name = "connectctct.html"
     
     def get_context_data(self, **kwargs):
-        context = super(ConnectCTCT, self).get_context_data(**kwargs)
+        context = super(ConnectCTCTView, self).get_context_data(**kwargs)
         context['code'] = self.request.GET.get('code',False)
         request = get_tokens(context['code'])
         context['token'] = request.json
