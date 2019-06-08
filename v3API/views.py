@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect, reverse
 from django.views.generic import FormView, TemplateView
+import logging
 import requests as r
 import os
 
@@ -11,12 +12,13 @@ from v3API.services import get_authorization, get_tokens
 class ConnectCTCT(TemplateView):
     http_method_names = ["get", "post"]
     template_name = "connectctct.html"
-
+    
     def get_context_data(self, **kwargs):
         context = super(ConnectCTCT, self).get_context_data(**kwargs)
         try:
             context['code'] = self.request.GET['code']
-            print(get_tokens(context['code']))
+            request = get_tokens(context['code'])
+            context['token'] = request.json
         except ValueError:
             # NOTE: Add some real handling here
             pass

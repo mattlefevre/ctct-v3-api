@@ -12,5 +12,11 @@
         {% csrf_token %}
         <input type="submit" value="Connect to Constant Contact">
     </form>
+    {% if code %}
+    <p>Access code: {{ code }}</p>
+    <p>Access Token: {{ token }}</p>
+    {% else %}
+    <p>You need to connect to Constant Contact</p>
+    {% endif %}
 </body>
 </html>
