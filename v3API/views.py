@@ -9,21 +9,16 @@ from v3API.forms import SignUpForm
 from v3API.services import get_authorization, get_tokens
 
 
-class ConnectCTCT(TemplateView):
+class ConnectCTCTView(TemplateView):
     http_method_names = ["get", "post"]
     template_name = "connectctct.html"
     
     def get_context_data(self, **kwargs):
         context = super(ConnectCTCT, self).get_context_data(**kwargs)
-        try:
-            context['code'] = self.request.GET['code']
-            request = get_tokens(context['code'])
-            context['token'] = request.json
-        except ValueError:
-            # NOTE: Add some real handling here
-            pass
-        finally:
-            return context
+        context['code'] = self.request.GET.get('code',False)
+        request = get_tokens(context['code'])
+        context['token'] = request.json
+        return context
     
     def post(self, request):
         return redirect(get_authorization())
