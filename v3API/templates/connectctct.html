@@ -15,6 +15,7 @@
     {% if code %}
     <p>Access code: {{ code }}</p>
     <p>Access Token: {{ token }}</p>
+    <a href="{% url 'jmml' %}"><h1>Ready to add a contact?</h1></a>
     {% else %}
     <p>You need to connect to Constant Contact</p>
     {% endif %}

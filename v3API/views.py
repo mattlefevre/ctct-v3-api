@@ -6,7 +6,7 @@ import os
 
 # local packages
 from v3API.forms import SignUpForm
-from v3API.services import get_authorization, get_tokens
+from v3API.services import CTCTAuth, send_contact
 
 
 class ConnectCTCTView(TemplateView):
@@ -16,12 +16,12 @@ class ConnectCTCTView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ConnectCTCTView, self).get_context_data(**kwargs)
         context['code'] = self.request.GET.get('code',False)
-        request = get_tokens(context['code'])
+        request = CTCTAuth.get_tokens(context['code'])
         context['token'] = request.json
         return context
     
     def post(self, request):
-        return redirect(get_authorization())
+        return redirect(CTCTAuth.get_authorization())
 
 class SignUpView(FormView):
     template_name = "sign_up.html"
@@ -29,7 +29,12 @@ class SignUpView(FormView):
     success_url = '/success/'
         
     def form_valid(self, form):
-        # NOTE: Send form data to CTCT
+        first_name = form['first_name']
+        email_address = form['email']
+
+        # If you add additional fields to the jmml form, you will need to update this method 
+        # and the send_contact method to include those fields
+        request = send_contact(first_name, email_address)
         return super().form_valid(form)
 
     
