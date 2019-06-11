@@ -2,6 +2,8 @@ import urllib
 import requests as r
 import os
 
+from v3API.models import AuthModel
+
 class CTCTAuth():
     """
     Holds all methods relating to authenticating to Constant Contact's API
@@ -18,7 +20,19 @@ class CTCTAuth():
         # Manually encode params, since we're returning a redirectable URL, not a GET request
         params = urllib.parse.urlencode(params,safe="+")
         base_url = "https://api.cc.email/v3/idfed?"
-        return base_url+params
+        return redirect(base_url+params)
+
+    @staticmethod
+    def store_new_tokens(response:r.Response):
+        json_data = request.json()
+        access_token = json_data['access_toekn']
+        refresh_token = json_data['refresh_token']
+
+        new_token = AuthModel(authorization_token=access_token, refresh_token=refresh_token)
+        new_token.save()
+        
+        return(new_token['authorization_token'], new_token['refresh_token'])
+
 
     @staticmethod
     def get_tokens(code):
@@ -30,6 +44,9 @@ class CTCTAuth():
         }
         headers = (os.environ['V3APIKEY'], os.environ['V3APISECRET'])
 
+        response = r.post(base_url, data=data, auth=headers)
+        store_new_tokens(response)
+
         return r.post(base_url, data=data, auth=headers)
     
     @staticmethod
@@ -37,13 +54,22 @@ class CTCTAuth():
         pass
 
     @staticmethod
-    def refresh_token():
-        pass
+    def refresh_token(refresh_token):
+        base_url = "https://idfed.constantcontact.com/as/token.oauth2?"
+        data = {
+            "refresh_token": refresh_token,
+            "grant_type":"refresh_token",
+                    }
+        headers = (os.environ['V3APIKEY'], os.environ['V3APISECRET'])
+
+        response = r.post(base_url, data=data, auth=headers)
+        
 
 
 def send_contact(first_name, email_address):
         # If you add additional fields to the jmml form, you will need to update this method 
         # and the form_valid medthod on the SignUpView view to include those fields
+    
     params = {
         "first_name": first_name,
         "email_address": email_address,
@@ -53,4 +79,5 @@ def send_contact(first_name, email_address):
     # GET to verify if contact already exists:
 
     # POST if contact doesn't already exist
+    
     request = r.post()

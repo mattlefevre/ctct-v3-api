@@ -21,7 +21,7 @@ class ConnectCTCTView(TemplateView):
         return context
     
     def post(self, request):
-        return redirect(CTCTAuth.get_authorization())
+        return CTCTAuth.get_authorization()
 
 class SignUpView(FormView):
     template_name = "sign_up.html"
