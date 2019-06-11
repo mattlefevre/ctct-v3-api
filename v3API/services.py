@@ -42,12 +42,12 @@ class CTCTAuth():
             "redirect_uri":"http://localhost:8000",
             "grant_type":"authorization_code",
         }
-        headers = (os.environ['V3APIKEY'], os.environ['V3APISECRET'])
+        auth_headers = (os.environ['V3APIKEY'], os.environ['V3APISECRET'])
 
-        response = r.post(base_url, data=data, auth=headers)
+        response = r.post(base_url, data=data, auth=auth_headers)
         store_new_tokens(response)
 
-        return r.post(base_url, data=data, auth=headers)
+        return r.post(base_url, data=data, auth=auth_headers)
     
     @staticmethod
     def check_token_expiration():
@@ -60,24 +60,45 @@ class CTCTAuth():
             "refresh_token": refresh_token,
             "grant_type":"refresh_token",
                     }
-        headers = (os.environ['V3APIKEY'], os.environ['V3APISECRET'])
+        auth_headers = (os.environ['V3APIKEY'], os.environ['V3APISECRET'])
 
-        response = r.post(base_url, data=data, auth=headers)
+        response = r.post(base_url, data=data, auth=auth_headers)
         
 
+class CTCTContactAPIs():
 
-def send_contact(first_name, email_address):
-        # If you add additional fields to the jmml form, you will need to update this method 
-        # and the form_valid medthod on the SignUpView view to include those fields
+    @staticmethod
+    # NOTE: Can I just use (email, *, **kwargs) here to include ANY info given to function? 
+    def add_contact(first_name, email_address):
+            # If you add additional fields to the jmml form, you will need to update this method 
+            # and the form_valid medthod on the SignUpView view to include those fields
+        
+        params = {
+            "first_name": first_name,
+            "email_address": email_address,
+        }
+
+        base_url = "https://api.cc.email/v3/contacts"
+        # GET to verify if contact already exists:
+        contact_exists = _check_contact_exists(email_address)
+        # PUT if contact already exists
+        if contact_exists: 
+            _update_existing_contact()
+        # POST if contact doesn't exist yet
+        else:
+            _send_new_contact() request = r.post()
     
-    params = {
-        "first_name": first_name,
-        "email_address": email_address,
-    }
+    @staticmethod
+    def _check_contact_exists(email_address):
+        #GET
+        pass
 
-    base_url = "https://api.cc.email/v3/contacts"
-    # GET to verify if contact already exists:
-
-    # POST if contact doesn't already exist
+    @staticmethod
+    def _send_new_contact(email_address, *, **kwargs):
+        #POST
+        pass
     
-    request = r.post()
+    @staticmethod
+    #PUT
+    def _update_existing_contact(email_address, *, **kwargs):
+        pass

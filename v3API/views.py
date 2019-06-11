@@ -6,7 +6,7 @@ import os
 
 # local packages
 from v3API.forms import SignUpForm
-from v3API.services import CTCTAuth, send_contact
+from v3API.services import CTCTAuth, CTCTContactAPIs
 
 
 class ConnectCTCTView(TemplateView):
@@ -32,9 +32,7 @@ class SignUpView(FormView):
         first_name = form['first_name']
         email_address = form['email']
 
-        # If you add additional fields to the jmml form, you will need to update this method 
-        # and the send_contact method to include those fields
-        request = send_contact(first_name, email_address)
+        request = CTCTContactAPIs.add_contact(first_name, email_address)
         return super().form_valid(form)
 
     
