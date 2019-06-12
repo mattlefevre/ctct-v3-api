@@ -21,19 +21,21 @@ class ConnectCTCTView(TemplateView):
         return context
     
     def post(self, request):
-        return CTCTAuth.get_authorization()
+        return redirect(CTCTAuth.get_authorization())
 
 class SignUpView(FormView):
+    http_method_names = ["get", "post"]
     template_name = "sign_up.html"
     form_class = SignUpForm
-    success_url = '/success/'
+    success_url = 'success'
         
     def form_valid(self, form):
         first_name = form['first_name']
         email_address = form['email']
 
         request = CTCTContactAPIs.add_contact(first_name, email_address)
-        return super().form_valid(form)
+        print(request)
+        return redirect('success')
 
     
 class SuccessView(TemplateView):
