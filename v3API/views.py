@@ -15,13 +15,14 @@ class ConnectCTCTView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super(ConnectCTCTView, self).get_context_data(**kwargs)
-        context['code'] = self.request.GET.get('code',False)
-        request = CTCTAuth.get_tokens(context['code'])
-        context['token'] = request.json
+        if self.request.GET.get('code',False) is True:
+            context['code'] = self.request.GET.get('code',False)
+            request = CTCTAuth.exchange_auth_code_for_tokens(context['code'])
+            context['token'] = request.json
         return context
     
     def post(self, request):
-        return redirect(CTCTAuth.get_authorization())
+        return redirect(CTCTAuth.create_auth_url())
 
 class SignUpView(FormView):
     http_method_names = ["get", "post"]

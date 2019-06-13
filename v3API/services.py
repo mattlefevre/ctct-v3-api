@@ -2,7 +2,7 @@ import urllib
 import requests
 import os
 
-from v3API.models import AuthModel
+from v3API.models import AuthModel, get_auth_token,get_refresh_token, set_auth_token
 
 class CTCTAuth():
     """
@@ -10,7 +10,7 @@ class CTCTAuth():
     """
 
     @staticmethod
-    def get_authorization():
+    def create_auth_url():
         params = {
             "client_id": os.environ.get('V3APIKEY'),
             "scope":"contact_data+campaign_data",
@@ -22,23 +22,10 @@ class CTCTAuth():
         base_url = "https://api.cc.email/v3/idfed?"
         return base_url+params
 
+
+
     @classmethod
-    def store_new_tokens(cls,response:requests.Response):
-        json_data = response.json()
-        print(f"store_new_tokens: json_data variable: {json_data}")
-        access_token = json_data['access_token']
-        refresh_token = json_data['refresh_token']
-
-        stored_token = cls.objects.get(id=1)
-        stored_token.access_token = access_token
-        stored_token.refresh_token = refresh_token
-        stored_token.save()
-        
-        return(stored_token['authorization_token'], stored_token['refresh_token'])
-
-
-    @staticmethod
-    def get_tokens(code):
+    def exchange_auth_code_for_tokens(code):
         base_url = "https://idfed.constantcontact.com/as/token.oauth2?"
         data = {
             "code":code,
@@ -48,19 +35,34 @@ class CTCTAuth():
         auth_headers = (os.environ['V3APIKEY'], os.environ['V3APISECRET'])
 
         response = requests.post(base_url, data=data, auth=auth_headers)
-        if response.status_code == "400":
+        if response.status_code == "200":
         # Save Tokens to database
-            stored_tokens = CTCTAuth.store_new_tokens(response)
+            stored_tokens = cls.store_new_tokens(response)
         else:
-            stored_tokens = response
+            return response
         return stored_tokens
+
+         @staticmethod
+
+    def store_new_tokens(cls,response:requests.Response):
+        json_data = response.json()
+        print(f"store_new_tokens: json_data variable: {json_data}")
+        access_token = json_data['access_token']
+        refresh_token = json_data['refresh_token']
+        
+        token_storage = AuthModel.objects.get(id=1)
+        token_storage.access_token = access_token
+        token_storage.refresh_token = refresh_token
+        token_storage.save()
+        return(token_storage['authorization_token'], token_storage['refresh_token'])
     
     @staticmethod
     def check_token_expiration():
         pass
 
     @staticmethod
-    def refresh_auth_token(refresh_token):
+    def refresh_access_token():
+        refresh_token = get_refresh_token()
         base_url = "https://idfed.constantcontact.com/as/token.oauth2?"
         data = {
             "refresh_token": refresh_token,
